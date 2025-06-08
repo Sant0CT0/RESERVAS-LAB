@@ -1,0 +1,537 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow: hidden; /* Asegura que el fondo ocupe toda la pantalla sin scroll */
+    background-color: #f4f4f4; /* Un color de fallback si la imagen no carga */
+}
+
+/* Contenedor para la imagen de fondo global (más borrosa) */
+#global-filtered-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('https://lasalleneza.btl.mx/wp-content/uploads/2024/02/PrincipalHD-980x490.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2; /* Más bajo que el formulario y el fondo intermedio */
+    transition: filter 0.5s ease-in-out;
+    filter: brightness(0.5) blur(5px); /* Siempre borroso */
+}
+
+/* NEW: Fondo intermedio para los formularios de pantalla completa. No para el main-content. */
+#form-background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('https://lasalleneza.btl.mx/wp-content/uploads/2024/02/PrincipalHD-980x490.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.7); /* Ligeramente oscurecido pero no borroso */
+    z-index: -1; /* Entre el fondo global y los formularios/main-content */
+}
+
+
+#login-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+    position: absolute; /* Changed to absolute to center it manually */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1; /* Ensure it's above backgrounds */
+}
+
+/* New style for the top-right button (Citas de Usuario) */
+.top-right-btn {
+    position: fixed; /* Fixed position relative to viewport */
+    top: 15px;
+    right: 15px;
+    background-color: #000080; /* Navy blue */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    z-index: 100; /* Ensure it's above other content */
+}
+
+.top-right-btn:hover {
+    background-color: #000066; /* Darker navy */
+}
+
+
+#login-container h1 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+#login-form label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+#login-form button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+#login-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+#login-message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* --- Main Content Layout --- */
+#main-content {
+    display: flex;
+    /* EXPANDED TO FULL SCREEN */
+    position: fixed; /* Changed to absolute to fixed */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Full viewport width */
+    height: 100vh; /* Full viewport height */
+    z-index: 1; /* Ensure it's above global background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Kept box-shadow for visual separation */
+}
+
+#sidebar {
+    width: 250px;
+    background-color: #2d2c55; /* Indigo Blue */
+    padding: 20px;
+    border-right: 1px solid #eee;
+    color: white; /* Text color for sidebar headings and links */
+}
+
+#sidebar h2 {
+    color: white;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.sidebar-heading {
+    margin-top: 30px;
+    color: white;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+#sidebar ul li {
+    margin-bottom: 10px;
+}
+
+#sidebar ul li a {
+    text-decoration: none;
+    color: #e0e0e0;
+    font-weight: bold;
+    padding: 8px 0;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+#sidebar ul li a:hover {
+    color: #ffffff;
+}
+
+#content-area {
+    flex-grow: 1;
+    padding: 30px;
+    position: relative; /* For positioning logout button */
+    /* NEW: Background image for content area */
+    background-image: url('https://lasalleneza.btl.mx/wp-content/uploads/2024/02/PrincipalHD-980x490.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.7); /* Match overlay brightness */
+    overflow-y: auto; /* Allow scrolling if content exceeds height */
+}
+
+/* NEW: Logout Button Style */
+.logout-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #dc3545; /* Red */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    z-index: 50;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+
+.content-panel { /* This style is now applied to inner content, not the full-screen container */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white for text legibility on top of background image */
+}
+
+
+/* --- Welcome Section --- */
+#welcome-section {
+    text-align: center;
+    margin-top: 50px;
+}
+
+#welcome-message-text h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#welcome-message-text p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* --- Full Screen Form Containers --- */
+.full-screen-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex; /* Use flexbox to center content */
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Above the login/main content and the form overlay */
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white background for the panel itself */
+    backdrop-filter: blur(2px); /* Slight blur on content behind the form, optional */
+    -webkit-backdrop-filter: blur(2px); /* For Safari */
+}
+
+.panel-inner-content { /* Common style for the actual content inside full-screen panels */
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 600px; /* Max width for forms */
+    width: 90%; /* Responsive width */
+    max-height: 90vh; /* Ensure it doesn't overflow tall screens */
+    overflow-y: auto; /* Allow scrolling if content is too long */
+}
+
+/* --- Reservation Form Specifics (within .panel-inner-content) --- */
+/* Apply to all forms within lab-reservation-form-container */
+.lab-reservation-form-container h2,
+#asistencia-content h2 { /* Added common style for these headers */
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.lab-reservation-form-container form { /* Apply flex styles to the form itself */
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+.lab-reservation-form-container label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.lab-reservation-form-container input[type="date"],
+.lab-reservation-form-container input[type="time"],
+.lab-reservation-form-container input[type="tel"],
+.lab-reservation-form-container input[type="email"],
+.lab-reservation-form-container input[type="text"],
+.lab-reservation-form-container textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: calc(100% - 22px);
+}
+
+.lab-reservation-form-container button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    align-self: center;
+    width: auto;
+    min-width: 180px;
+    margin-top: 15px; /* Added margin-top for separation */
+}
+
+.lab-reservation-form-container button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.reservation-message { /* Applied to all reservation messages */
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* --- Citas Section (within main-content) --- */
+#citas-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+#citas-list li {
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+}
+
+#citas-list li strong {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+#citas-list li .delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    align-self: flex-end;
+}
+
+#citas-list li .delete-btn:hover {
+    background-color: #c82333;
+}
+
+#no-citas-message {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+}
+
+.password-prompt {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.password-prompt label,
+.password-prompt input,
+.password-prompt button {
+    margin-bottom: 10px;
+}
+
+.password-prompt label {
+    color: #555;
+}
+
+.password-prompt input[type="password"] {
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.password-prompt button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.password-prompt button:hover {
+    background-color: #0056b3;
+}
+
+
+/* --- Estadísticas Section --- */
+.chart-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    height: 400px;
+}
+
+/* --- Confirmation Message (Overlay) --- */
+#confirmation-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #28a745;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 1.2em;
+    font-weight: bold;
+    z-index: 1000;
+    text-align: center;
+}
+
+/* --- Utility Classes --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- Asistencia Usuario (within .panel-inner-content) --- */
+#asistencia-search-container label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+#asistencia-id-input {
+    width: calc(100% - 40px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+#search-asistencia-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#search-asistencia-btn:hover {
+    background-color: #138496;
+}
+
+#asistencia-message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+#found-cita-details {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    text-align: left;
+}
+
+#found-cita-details h3 {
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#asistencia-cita-details-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+#asistencia-cita-details-list li {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+#confirm-asistencia-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#confirm-asistencia-btn:hover {
+    background-color: #0056b3;
+}
+
+.back-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.back-btn:hover {
+    background-color: #5a6268;
+}

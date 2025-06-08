@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas de Laboratorios</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div id="global-filtered-background"></div>
+    <div id="form-background-overlay" class="hidden"></div>
+
+    <div id="confirmation-message" class="hidden">
+        Su reservación fue agendada
+    </div>
+
+    <button id="asistencia-btn" class="top-right-btn">Citas de Usuario</button>
+
+    <div id="login-container">
+        <h1>Iniciar Sesión</h1>
+        <form id="login-form">
+            <label for="matricula">Matrícula:</label>
+            <input type="text" id="matricula" name="matricula" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <p id="login-message" style="color: red;"></p>
+    </div>
+
+    <div id="asistencia-content" class="hidden full-screen-panel">
+        <div class="panel-inner-content">
+            <h2>Citas de Usuario</h2>
+            <div id="asistencia-search-container">
+                <label for="asistencia-id-input">ID de Reserva:</label>
+                <input type="text" id="asistencia-id-input" placeholder="Introduce el ID de la reserva" required>
+                <button id="search-asistencia-btn">Buscar y Confirmar Asistencia</button>
+                <p id="asistencia-message" style="color: green;"></p>
+            </div>
+            <div id="found-cita-details" class="hidden">
+                <h3>Detalles de la Cita:</h3>
+                <ul id="asistencia-cita-details-list"></ul>
+                <button id="confirm-asistencia-btn" class="hidden">Confirmar Asistencia</button>
+            </div>
+            <button id="back-to-login-from-asistencia" class="back-btn">Volver al Inicio de Sesión</button>
+        </div>
+    </div>
+
+    <div id="enfermeria-form-container" class="hidden full-screen-panel lab-reservation-form-container">
+        <div class="panel-inner-content">
+            <h2>Reserva Laboratorio Enfermería</h2> 
+            <form id="enfermeria-reservation-form" data-lab-name="Laboratorio Enfermería">
+                <label for="enfermeria-res-name">Nombre de quien reserva:</label>
+                <input type="text" id="enfermeria-res-name" name="res-name" required>
+
+                <label for="enfermeria-res-date">Fecha:</label>
+                <input type="date" id="enfermeria-res-date" name="res-date" required>
+
+                <label for="enfermeria-res-start-time">Hora de inicio:</label>
+                <input type="time" id="enfermeria-res-start-time" name="res-start-time" required>
+
+                <label for="enfermeria-res-end-time">Hora de fin:</label>
+                <input type="time" id="enfermeria-res-end-time" name="res-end-time" required>
+
+                <label for="enfermeria-res-phone">Número de teléfono:</label>
+                <input type="tel" id="enfermeria-res-phone" name="res-phone" pattern="[0-9]{10}" placeholder="Ej: 5512345678" required>
+
+                <label for="enfermeria-res-email">Correo electrónico:</label>
+                <input type="email" id="enfermeria-res-email" name="res-email" required>
+
+                <label for="enfermeria-res-materials">Materiales a ocupar:</label>
+                <textarea id="enfermeria-res-materials" name="res-materials" rows="4" required></textarea>
+
+                <label for="enfermeria-res-activity-type">Tipo de actividad:</label>
+                <input type="text" id="enfermeria-res-activity-type" name="res-activity-type" required>
+
+                <button type="submit">Confirmar Reserva</button>
+                <button type="button" class="back-to-main-btn back-btn">Volver</button>
+            </form>
+            <p id="enfermeria-reservation-message" class="reservation-message"></p>
+        </div>
+    </div>
+
+    <div id="psicologia-form-container" class="hidden full-screen-panel lab-reservation-form-container">
+        <div class="panel-inner-content">
+            <h2>Reserva Laboratorio Psicología</h2> 
+            <form id="psicologia-reservation-form" data-lab-name="Laboratorio Psicología">
+                <label for="psicologia-res-name">Nombre de quien reserva:</label>
+                <input type="text" id="psicologia-res-name" name="res-name" required>
+
+                <label for="psicologia-res-date">Fecha:</label>
+                <input type="date" id="psicologia-res-date" name="res-date" required>
+
+                <label for="psicologia-res-start-time">Hora de inicio:</label>
+                <input type="time" id="psicologia-res-start-time" name="res-start-time" required>
+
+                <label for="psicologia-res-end-time">Hora de fin:</label>
+                <input type="time" id="psicologia-res-end-time" name="res-end-time" required>
+
+                <label for="psicologia-res-phone">Número de teléfono:</label>
+                <input type="tel" id="psicologia-res-phone" name="res-phone" pattern="[0-9]{10}" placeholder="Ej: 5512345678" required>
+
+                <label for="psicologia-res-email">Correo electrónico:</label>
+                <input type="email" id="psicologia-res-email" name="res-email" required>
+
+                <label for="psicologia-res-materials">Materiales a ocupar:</label>
+                <textarea id="psicologia-res-materials" name="res-materials" rows="4" required></textarea>
+
+                <label for="psicologia-res-activity-type">Tipo de actividad:</label>
+                <input type="text" id="psicologia-res-activity-type" name="res-activity-type" required>
+
+                <button type="submit">Confirmar Reserva</button>
+                <button type="button" class="back-to-main-btn back-btn">Volver</button>
+            </form>
+            <p id="psicologia-reservation-message" class="reservation-message"></p>
+        </div>
+    </div>
+
+    <div id="criminalistica-form-container" class="hidden full-screen-panel lab-reservation-form-container">
+        <div class="panel-inner-content">
+            <h2>Reserva Laboratorio Criminalística</h2> 
+            <form id="criminalistica-reservation-form" data-lab-name="Laboratorio Criminalística">
+                <label for="criminalistica-res-name">Nombre de quien reserva:</label>
+                <input type="text" id="criminalistica-res-name" name="res-name" required>
+
+                <label for="criminalistica-res-date">Fecha:</label>
+                <input type="date" id="criminalistica-res-date" name="res-date" required>
+
+                <label for="criminalistica-res-start-time">Hora de inicio:</label>
+                <input type="time" id="criminalistica-res-start-time" name="res-start-time" required>
+
+                <label for="criminalistica-res-end-time">Hora de fin:</label>
+                <input type="time" id="criminalistica-res-end-time" name="res-end-time" required>
+
+                <label for="criminalistica-res-phone">Número de teléfono:</label>
+                <input type="tel" id="criminalistica-res-phone" name="res-phone" pattern="[0-9]{10}" placeholder="Ej: 5512345678" required>
+
+                <label for="criminalistica-res-email">Correo electrónico:</label>
+                <input type="email" id="criminalistica-res-email" name="res-email" required>
+
+                <label for="criminalistica-res-materials">Materiales a ocupar:</label>
+                <textarea id="criminalistica-res-materials" name="res-materials" rows="4" required></textarea>
+
+                <label for="criminalistica-res-activity-type">Tipo de actividad:</label>
+                <input type="text" id="criminalistica-res-activity-type" name="res-activity-type" required>
+
+                <button type="submit">Confirmar Reserva</button>
+                <button type="button" class="back-to-main-btn back-btn">Volver</button>
+            </form>
+            <p id="criminalistica-reservation-message" class="reservation-message"></p>
+        </div>
+    </div>
+
+    <div id="hazel-form-container" class="hidden full-screen-panel lab-reservation-form-container">
+        <div class="panel-inner-content">
+            <h2>Reserva Cámara de Hazel</h2> 
+            <form id="hazel-reservation-form" data-lab-name="Cámara de Hazel">
+                <label for="hazel-res-name">Nombre de quien reserva:</label>
+                <input type="text" id="hazel-res-name" name="res-name" required>
+
+                <label for="hazel-res-date">Fecha:</label>
+                <input type="date" id="hazel-res-date" name="res-date" required>
+
+                <label for="hazel-res-start-time">Hora de inicio:</label>
+                <input type="time" id="hazel-res-start-time" name="res-start-time" required>
+
+                <label for="hazel-res-end-time">Hora de fin:</label>
+                <input type="time" id="hazel-res-end-time" name="res-end-time" required>
+
+                <label for="hazel-res-phone">Número de teléfono:</label>
+                <input type="tel" id="hazel-res-phone" name="res-phone" pattern="[0-9]{10}" placeholder="Ej: 5512345678" required>
+
+                <label for="hazel-res-email">Correo electrónico:</label>
+                <input type="email" id="hazel-res-email" name="res-email" required>
+
+                <label for="hazel-res-materials">Materiales a ocupar:</label>
+                <textarea id="hazel-res-materials" name="res-materials" rows="4" required></textarea>
+
+                <label for="hazel-res-activity-type">Tipo de actividad:</label>
+                <input type="text" id="hazel-res-activity-type" name="res-activity-type" required>
+
+                <button type="submit">Confirmar Reserva</button>
+                <button type="button" class="back-to-main-btn back-btn">Volver</button>
+            </form>
+            <p id="hazel-reservation-message" class="reservation-message"></p>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden">
+        <aside id="sidebar">
+            <h2>Laboratorio</h2>
+            <ul>
+                <li><a href="#" data-lab="enfermeria">Laboratorio Enfermería</a></li>
+                <li><a href="#" data-lab="psicologia">Laboratorio Psicología</a></li>
+                <li><a href="#" data-lab="criminalistica">Laboratorio Criminalística</a></li>
+                <li><a href="#" data-lab="hazel">Cámara de Hazel</a></li>
+            </ul>
+
+            <h2 class="sidebar-heading">Gestión de Reservas</h2>
+            <ul>
+                <li><a href="#" data-section="citas">Citas</a></li>
+                <li><a href="#" data-section="estadisticas">Estadísticas</a></li>
+            </ul>
+        </aside>
+
+        <main id="content-area">
+            <button id="logout-btn" class="logout-btn hidden">Cerrar Sesión</button>
+
+            <div id="welcome-section" class="initial-content content-panel">
+                <div id="welcome-message-text">
+                    <h1>Bienvenido al Sistema de Reservas</h1>
+                    <p>Selecciona una opción del menú de la izquierda.</p>
+                </div>
+            </div>
+
+            <div id="citas-content" class="hidden section-content content-panel">
+                <h2><span id="current-citas-name">Citas</span></h2>
+                <div id="citas-password-prompt" class="password-prompt">
+                    <label for="citas-password">Introduce tu contraseña:</label>
+                    <input type="password" id="citas-password">
+                    <button id="citas-password-submit">Acceder a Citas</button>
+                    <p id="citas-password-message" style="color: red;"></p>
+                </div>
+                <div id="citas-list-container" class="hidden">
+                    <p>Aquí se mostrarían tus citas o un listado de reservas.</p>
+                    <ul id="citas-list">
+                        </ul>
+                    <p id="no-citas-message">No hay citas registradas.</p>
+                </div>
+            </div>
+
+            <div id="estadisticas-content" class="hidden section-content content-panel">
+                <h2><span id="current-estadisticas-name">Estadísticas de Reserva de Laboratorios</span></h2>
+                <div class="chart-container">
+                    <canvas id="labReservationChart"></canvas>
+                </div>
+                <p>Aquí se mostrarían gráficos o datos estadísticos sobre las reservas.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQ65q5ZU9tkmcYepEHFKEX20FAIEnN2Zc",
+            authDomain: "reservas-f4701.firebaseapp.com",
+            databaseURL: "https://reservas-f4701-default-rtdb.firebaseio.com",
+            projectId: "reservas-f4701",
+            storageBucket: "reservas-f4701.firebasestorage.app",
+            messagingSenderId: "1033573249892",
+            appId: "1:1033573249892:web:6e4a61d4e82f3f6c4b0071",
+            measurementId: "G-FFMLS5BF7B"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        class Reserva {
+            constructor(id, lab, name, date, startTime, endTime, phone, email, materials, activityType, confirmedAttendance = false) {
+                this._id = id;
+                this._lab = lab;
+                this._name = name;
+                this._date = date;
+                this._startTime = startTime;
+                this._endTime = endTime;
+                this._phone = phone;
+                this._email = email;
+                this._materials = materials;
+                this._activityType = activityType;
+                this._confirmedAttendance = confirmedAttendance;
+            }
+            get id() { return this._id; }
+            get lab() { return this._lab; }
+            get name() { return this._name; }
+            get date() { return this._date; }
+            get startTime() { return this._startTime; }
+            get endTime() { return this._endTime; }
+            get phone() { return this._phone; }
+            get email() { return this._email; }
+            get materials() { return this._materials; }
+            get activityType() { return this._activityType; }
+            get confirmedAttendance() { return this._confirmedAttendance; }
+            set lab(newLab) {
+                if (typeof newLab === 'string' && newLab.trim() !== '') {
+                    this._lab = newLab;
+                } else {
+                    console.error('El laboratorio debe ser una cadena no vacía.');
+                }
+            }
+            set date(newDate) { this._date = newDate; }
+            set startTime(newTime) { this._startTime = newTime; }
+            set endTime(newTime) { this._endTime = newTime; }
+            set confirmedAttendance(isConfirmed) { this._confirmedAttendance = isConfirmed; }
+        }
+
+        let currentReservas = [];
+        let myChart; // Global variable for Chart instance
+
+        // --- DOM Elements ---
+        const globalFilteredBackground = document.getElementById('global-filtered-background');
+        const formBackgroundOverlay = document.getElementById('form-background-overlay');
+        const loginContainer = document.getElementById('login-container');
+        const mainContent = document.getElementById('main-content');
+        const asistenciaBtn = document.getElementById('asistencia-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        const asistenciaContent = document.getElementById('asistencia-content');
+        
+        // NEW: References to individual lab forms
+        const enfermeriaFormContainer = document.getElementById('enfermeria-form-container');
+        const psicologiaFormContainer = document.getElementById('psicologia-form-container');
+        const criminalisticaFormContainer = document.getElementById('criminalistica-form-container');
+        const hazelFormContainer = document.getElementById('hazel-form-container');
+
+
+        const searchAsistenciaBtn = document.getElementById('search-asistencia-btn');
+        const asistenciaIdInput = document.getElementById('asistencia-id-input');
+        const asistenciaMessage = document.getElementById('asistencia-message');
+        const foundCitaDetails = document.getElementById('found-cita-details');
+        const asistenciaCitaDetailsList = document.getElementById('asistencia-cita-details-list');
+        const confirmAsistenciaBtn = document.getElementById('confirm-asistencia-btn');
+        const backToLoginFromAsistenciaBtn = document.getElementById('back-to-login-from-asistencia');
+        
+        // NEW: Back buttons for individual lab forms
+        document.querySelectorAll('.back-to-main-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                showMainContent();
+                document.getElementById('welcome-section').classList.remove('hidden');
+            });
+        });
+
+
+        // --- Background Management ---
+        function toggleGlobalBackgroundBlur(enable) {
+            if (enable) {
+                globalFilteredBackground.classList.add('blurred-background');
+            } else {
+                globalFilteredBackground.classList.remove('blurred-background');
+            }
+        }
+
+        function toggleFormBackgroundOverlay(enable) {
+            if (enable) {
+                formBackgroundOverlay.classList.remove('hidden');
+            } else {
+                formBackgroundOverlay.classList.add('hidden');
+            }
+        }
+
+        // --- UI State Management ---
+        function showLoginScreen() {
+            loginContainer.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+            asistenciaContent.classList.add('hidden');
+            // NEW: Hide all individual lab forms
+            document.querySelectorAll('.lab-reservation-form-container').forEach(form => form.classList.add('hidden'));
+            asistenciaBtn.classList.remove('hidden');
+            logoutBtn.classList.add('hidden');
+            toggleGlobalBackgroundBlur(true);
+            toggleFormBackgroundOverlay(false);
+        }
+
+        function showMainContent() {
+            loginContainer.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+            asistenciaContent.classList.add('hidden');
+            // NEW: Hide all individual lab forms
+            document.querySelectorAll('.lab-reservation-form-container').forEach(form => form.classList.add('hidden'));
+            asistenciaBtn.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
+            toggleGlobalBackgroundBlur(false);
+            toggleFormBackgroundOverlay(false);
+        }
+
+        function showFullScreenForm(formElement) {
+            loginContainer.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            asistenciaContent.classList.add('hidden');
+            // NEW: Hide all individual lab forms before showing one
+            document.querySelectorAll('.lab-reservation-form-container').forEach(form => form.classList.add('hidden'));
+
+            formElement.classList.remove('hidden');
+            asistenciaBtn.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
+
+            toggleGlobalBackgroundBlur(false);
+            toggleFormBackgroundOverlay(true);
+        }
+
+
+        // --- Login Logic ---
+        const CORRECT_PASSWORD = '123';
+        const CORRECT_MATRICULA = '12345';
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const matricula = document.getElementById('matricula').value;
+            const password = document.getElementById('password').value;
+            const loginMessage = document.getElementById('login-message');
+
+            if (matricula === CORRECT_MATRICULA && password === CORRECT_PASSWORD) {
+                showMainContent();
+                loginMessage.textContent = '';
+            } else {
+                loginMessage.textContent = 'Matrícula o contraseña incorrectos.';
+            }
+        });
+
+        // --- Logout Logic ---
+        logoutBtn.addEventListener('click', () => {
+            showLoginScreen();
+        });
+
+        // --- Citas de Usuario Button Logic ---
+        let foundReservaId = null;
+
+        asistenciaBtn.addEventListener('click', () => {
+            showFullScreenForm(asistenciaContent);
+            asistenciaIdInput.value = '';
+            asistenciaMessage.textContent = '';
+            foundCitaDetails.classList.add('hidden');
+            asistenciaCitaDetailsList.innerHTML = '';
+            confirmAsistenciaBtn.classList.add('hidden');
+        });
+
+        backToLoginFromAsistenciaBtn.addEventListener('click', () => {
+            showLoginScreen();
+        });
+
+        searchAsistenciaBtn.addEventListener('click', async () => {
+            const searchId = asistenciaIdInput.value.trim();
+            asistenciaMessage.textContent = '';
+            foundCitaDetails.classList.add('hidden');
+            asistenciaCitaDetailsList.innerHTML = '';
+            confirmAsistenciaBtn.classList.add('hidden');
+
+            if (!searchId) {
+                asistenciaMessage.textContent = 'Por favor, introduce un ID de reserva.';
+                asistenciaMessage.style.color = 'red';
+                return;
+            }
+
+            try {
+                const snapshot = await database.ref('reservas/' + searchId).once('value');
+                const reservaData = snapshot.val();
+
+                if (reservaData) {
+                    foundReservaId = searchId;
+                    asistenciaMessage.textContent = 'Cita encontrada. Detalles:';
+                    asistenciaMessage.style.color = 'green';
+                    foundCitaDetails.classList.remove('hidden');
+
+                    const listItemHTML = `
+                        <li><strong>Laboratorio:</strong> ${reservaData.lab}</li>
+                        <li><strong>Nombre Reserva:</strong> ${reservaData.name}</li>
+                        <li><strong>Fecha:</strong> ${reservaData.date}</li>
+                        <li><strong>Hora:</strong> ${reservaData.startTime} - ${reservaData.endTime}</li>
+                        <li><strong>Contacto:</strong> ${reservaData.email} (${reservaData.phone})</li>
+                        <li><strong>Actividad:</strong> ${reservaData.activityType}</li>
+                        <li><strong>Materiales:</strong> ${reservaData.materials}</li>
+                        <li><strong>Estado de Asistencia:</strong> ${reservaData.confirmedAttendance ? 'Confirmada' : 'Pendiente'}</li>
+                    `;
+                    asistenciaCitaDetailsList.innerHTML = listItemHTML;
+
+                    if (!reservaData.confirmedAttendance) {
+                        confirmAsistenciaBtn.classList.remove('hidden');
+                    } else {
+                        asistenciaMessage.textContent += ' (¡Asistencia ya confirmada!)';
+                        asistenciaMessage.style.color = 'orange';
+                    }
+
+                } else {
+                    asistenciaMessage.textContent = 'No se encontró ninguna cita con ese ID.';
+                    asistenciaMessage.style.color = 'red';
+                }
+            } catch (error) {
+                console.error("Error al buscar cita:", error);
+                asistenciaMessage.textContent = 'Error al buscar la cita.';
+                asistenciaMessage.style.color = 'red';
+            }
+        });
+
+        confirmAsistenciaBtn.addEventListener('click', async () => {
+            if (foundReservaId) {
+                try {
+                    await database.ref('reservas/' + foundReservaId).update({
+                        confirmedAttendance: true
+                    });
+                    asistenciaMessage.textContent = '¡Asistencia confirmada con éxito!';
+                    asistenciaMessage.style.color = 'green';
+                    confirmAsistenciaBtn.classList.add('hidden');
+                    const currentStatusElement = asistenciaCitaDetailsList.querySelector('li:last-child');
+                    if (currentStatusElement) {
+                        currentStatusElement.innerHTML = '<strong>Estado de Asistencia:</strong> Confirmada';
+                    }
+                    foundReservaId = null;
+                } catch (error) {
+                    console.error("Error al confirmar asistencia:", error);
+                    asistenciaMessage.textContent = 'Error al confirmar asistencia.';
+                    asistenciaMessage.style.color = 'red';
+                }
+            }
+        });
+
+        // --- Sidebar Navigation ---
+        document.querySelectorAll('#sidebar ul li a').forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const labType = this.dataset.lab;
+                const sectionType = this.dataset.section;
+
+                // Hide all main content sections and full-screen forms
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                document.getElementById('welcome-section').classList.add('hidden');
+                asistenciaContent.classList.add('hidden');
+                // NEW: Hide all individual lab forms
+                document.querySelectorAll('.lab-reservation-form-container').forEach(form => form.classList.add('hidden'));
+
+
+                if (labType) {
+                    let targetFormContainer;
+                    switch (labType) {
+                        case 'enfermeria': targetFormContainer = enfermeriaFormContainer; break;
+                        case 'psicologia': targetFormContainer = psicologiaFormContainer; break;
+                        case 'criminalistica': targetFormContainer = criminalisticaFormContainer; break;
+                        case 'hazel': targetFormContainer = hazelFormContainer; break;
+                        default: return; // Should not happen
+                    }
+                    showFullScreenForm(targetFormContainer);
+                    // Reset the form and message when showing
+                    const form = targetFormContainer.querySelector('form');
+                    form.reset();
+                    const messageElement = targetFormContainer.querySelector('.reservation-message');
+                    if (messageElement) messageElement.textContent = '';
+
+                } else if (sectionType === 'citas') {
+                    mainContent.classList.remove('hidden');
+                    document.getElementById('citas-content').classList.remove('hidden');
+                    document.getElementById('citas-password-prompt').classList.remove('hidden');
+                    document.getElementById('citas-list-container').classList.add('hidden');
+                    document.getElementById('citas-password').value = '';
+                    document.getElementById('citas-password-message').textContent = '';
+                    document.getElementById('current-citas-name').textContent = 'Tus Citas';
+
+                    toggleGlobalBackgroundBlur(false);
+                    toggleFormBackgroundOverlay(false);
+                } else if (sectionType === 'estadisticas') {
+                    mainContent.classList.remove('hidden');
+                    document.getElementById('estadisticas-content').classList.remove('hidden');
+                    updateChart();
+                    document.getElementById('current-estadisticas-name').textContent = 'Estadísticas de Uso';
+
+                    toggleGlobalBackgroundBlur(false);
+                    toggleFormBackgroundOverlay(false);
+                }
+            });
+        });
+
+
+        // --- Reservation Form Logic (Saving to Firebase and Confirmation) ---
+        document.querySelectorAll('.lab-reservation-form-container form').forEach(form => {
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const labName = this.dataset.labName; // Get lab name from data attribute
+                const messageElement = this.querySelector('.reservation-message');
+                
+                const newReservaData = {
+                    lab: labName,
+                    name: this.querySelector('[name="res-name"]').value,
+                    date: this.querySelector('[name="res-date"]').value,
+                    startTime: this.querySelector('[name="res-start-time"]').value,
+                    endTime: this.querySelector('[name="res-end-time"]').value,
+                    phone: this.querySelector('[name="res-phone"]').value,
+                    email: this.querySelector('[name="res-email"]').value,
+                    materials: this.querySelector('[name="res-materials"]').value,
+                    activityType: this.querySelector('[name="res-activity-type"]').value,
+                    confirmedAttendance: false
+                };
+                
+                console.log("Datos de la nueva reserva a enviar:", newReservaData);
+
+                try {
+                    await database.ref('reservas').push(newReservaData);
+
+                    const confirmationMessageDiv = document.getElementById('confirmation-message');
+                    confirmationMessageDiv.classList.remove('hidden');
+                    setTimeout(() => { confirmationMessageDiv.classList.add('hidden'); }, 3000);
+
+                    messageElement.textContent = '¡Reserva confirmada con éxito!';
+                    messageElement.style.color = 'green';
+                    this.reset();
+                    sendConfirmationEmail(newReservaData);
+
+                    // After successful submission, go back to main content
+                    showMainContent();
+                    document.getElementById('welcome-section').classList.remove('hidden');
+
+                } catch (error) {
+                    console.error("Error al guardar la reserva en Firebase:", error);
+                    messageElement.textContent = 'Error al confirmar la reserva.';
+                    messageElement.style.color = 'red';
+                }
+            });
+        });
+
+
+        // --- Citas Access with Password Logic ---
+        document.getElementById('citas-password-submit').addEventListener('click', function() {
+            const enteredPassword = document.getElementById('citas-password').value;
+            const citasPasswordMessage = document.getElementById('citas-password-message');
+
+            if (enteredPassword === CORRECT_PASSWORD) {
+                document.getElementById('citas-password-prompt').classList.add('hidden');
+                document.getElementById('citas-list-container').classList.remove('hidden');
+                renderCitas();
+            } else {
+                citasPasswordMessage.textContent = 'Contraseña incorrecta.';
+            }
+        });
+
+        // --- Firebase Listener for Reservas ---
+        database.ref('reservas').on('value', (snapshot) => {
+            currentReservas = [];
+            snapshot.forEach((childSnapshot) => {
+                const reservaId = childSnapshot.key;
+                const reservaData = childSnapshot.val();
+                currentReservas.push(new Reserva(
+                    reservaId,
+                    reservaData.lab,
+                    reservaData.name, // Added name
+                    reservaData.date,
+                    reservaData.startTime,
+                    reservaData.endTime,
+                    reservaData.phone,
+                    reservaData.email,
+                    reservaData.materials,
+                    reservaData.activityType,
+                    reservaData.confirmedAttendance || false
+                ));
+            });
+            renderCitas();
+            updateChart();
+        });
+
+
+        // --- Functions for rendering Citas and Charts ---
+        function renderCitas() {
+            const citasList = document.getElementById('citas-list');
+            citasList.innerHTML = '';
+            const noCitasMessage = document.getElementById('no-citas-message');
+
+            if (currentReservas.length === 0) {
+                noCitasMessage.classList.remove('hidden');
+            } else {
+                noCitasMessage.classList.add('hidden');
+                currentReservas.forEach(reserva => {
+                    const labName = reserva.lab || 'Laboratorio Desconocido';
+                    const attendanceStatus = reserva.confirmedAttendance ? '<span style="color: green; font-weight: bold;">(Asistencia Confirmada)</span>' : '<span style="color: orange; font-weight: bold;">(Asistencia Pendiente)</span>';
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${labName}</strong> - ${reserva.name}<br>
+                        Fecha: ${reserva.date} de ${reserva.startTime} a ${reserva.endTime}<br>
+                        Contacto: ${reserva.email} (${reserva.phone})<br>
+                        Actividad: ${reserva.activityType} - Materiales: ${reserva.materials}<br>
+                        <small>ID de Reserva: ${reserva.id}</small> ${attendanceStatus}
+                        <button class="delete-btn" data-id="${reserva.id}">Eliminar</button>
+                    `;
+                    citasList.appendChild(listItem);
+                });
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const idToDelete = this.dataset.id;
+                        await database.ref('reservas/' + idToDelete).remove();
+                    });
+                });
+            }
+        }
+
+        function updateChart() {
+            const labCounts = {};
+            currentReservas.forEach(reserva => {
+                const labName = reserva.lab || 'Laboratorio Desconocido';
+                labCounts[labName] = (labCounts[labName] || 0) + 1;
+            });
+            const labels = Object.keys(labCounts);
+            const data = Object.values(labCounts);
+
+            if (myChart) {
+                myChart.data.labels = labels;
+                myChart.data.datasets[0].data = data;
+                myChart.update();
+            } else {
+                const ctx = document.getElementById('labReservationChart').getContext('2d');
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'Número de Reservas', data, backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'], borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'], borderWidth: 1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+                });
+            }
+        }
+
+        function sendConfirmationEmail(newReservaData) {
+            console.log('--- SIMULACIÓN DE ENVÍO DE CORREO DE CONFIRMACIÓN ---');
+            console.log(`Enviando correo a: ${newReservaData.email}`);
+            console.log('Asunto: Confirmación de Reserva de Laboratorio');
+            console.log('Cuerpo del correo:');
+            console.log(`Hola ${newReservaData.name},
+Tu reserva para el ${newReservaData.lab} ha sido confirmada:
+Fecha: ${newReservaData.date}
+Hora: ${newReservaData.startTime} - ${newReservaData.endTime}
+Tipo de actividad: ${newReservaData.activityType}
+Materiales: ${newReservaData.materials}
+ID de Reserva: ${newReservaData.id || 'No disponible (solo para simulación, el ID real lo da Firebase)'}
+
+Gracias por usar nuestro sistema de reservas.
+
+Atentamente,
+El Equipo de Laboratorios`);
+            console.log('----------------------------------------------------');
+        }
+
+        // --- Initial State on Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            showLoginScreen();
+        });
+    </script>
+</body>
+</html>
